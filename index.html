@@ -1,0 +1,2231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UpperBooks — in development</title>
+<script>document.documentElement.classList.add('js');</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0C221C;
+    --pine:#123A30;
+    --moss:#3E7C68;
+    --brass:#C6A053;
+    --paper:#EFF1EA;
+    --paper-2:#E4E7DC;
+    --text:#16221D;
+    --muted:#55635B;
+    --paper-on-dark:#E9EDE4;
+    --muted-on-dark:#9DB0A6;
+    --line-dark:rgba(233,237,228,0.14);
+    --card:#FFFFFF;
+    --ease:cubic-bezier(.2,.7,.2,1);
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:"Inter",system-ui,sans-serif;
+    background:var(--paper);
+    color:var(--text);
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  .wrap{max-width:1080px;margin:0 auto;padding:0 28px}
+
+  .eyebrow{
+    font-family:"Space Mono",monospace;
+    font-size:12px;
+    letter-spacing:0.18em;
+    text-transform:uppercase;
+    color:var(--moss);
+  }
+
+  /* ============ scroll reveal system ============ */
+  html.js .sr{
+    opacity:0;
+    transform:translateY(22px);
+    transition:opacity .9s var(--ease), transform .9s var(--ease);
+  }
+  html.js .sr.in{opacity:1;transform:none}
+  html.js .sr.lag1{transition-delay:.12s}
+  html.js .sr.lag2{transition-delay:.24s}
+
+  /* ============ nav ============ */
+  nav{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:26px 0;
+  }
+  .mark{
+    font-family:"Fraunces",serif;
+    font-weight:600;font-size:22px;letter-spacing:-0.01em;
+    color:var(--text);
+  }
+  .status-pill{
+    display:inline-flex;align-items:center;gap:8px;
+    font-family:"Space Mono",monospace;
+    font-size:11px;letter-spacing:0.14em;text-transform:uppercase;
+    color:var(--muted);
+    border:1px solid var(--paper-2);
+    border-radius:100px;padding:7px 14px;
+  }
+  .dot{
+    width:7px;height:7px;border-radius:50%;
+    background:var(--brass);
+    box-shadow:0 0 0 0 rgba(198,160,83,0.5);
+    animation:pulse 2.6s ease-out infinite;
+  }
+  @keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(198,160,83,0.5)}
+    70%{box-shadow:0 0 0 7px rgba(198,160,83,0)}
+    100%{box-shadow:0 0 0 0 rgba(198,160,83,0)}
+  }
+
+  /* ============ hero ============ */
+  .hero{
+    position:relative;
+    padding:56px 0 104px;
+    overflow:hidden;
+  }
+  .hero::before{
+    content:"";position:absolute;inset:0;z-index:0;
+    background:repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent 37px,
+      var(--paper-2) 37px,
+      var(--paper-2) 38px
+    );
+    -webkit-mask-image:linear-gradient(to bottom,rgba(0,0,0,0.5),transparent 82%);
+    mask-image:linear-gradient(to bottom,rgba(0,0,0,0.5),transparent 82%);
+    opacity:0.7;
+  }
+  .hero .wrap{
+    position:relative;z-index:1;
+    display:grid;
+    grid-template-columns:minmax(0,1.15fr) minmax(0,0.85fr);
+    gap:64px;
+    align-items:center;
+  }
+  .hero .eyebrow{display:block;margin-bottom:24px}
+  h1{
+    font-family:"Fraunces",serif;
+    font-weight:500;
+    font-size:clamp(32px,5vw,54px);
+    line-height:1.06;
+    letter-spacing:-0.02em;
+    color:var(--text);
+  }
+  h1 .soft{color:var(--moss)}
+  .lede{
+    margin-top:26px;
+    font-size:clamp(16px,2vw,19px);
+    color:var(--muted);
+    max-width:50ch;
+  }
+
+  /* stamp-style development badge, sibling of the nav pill */
+  .dev-stamp{
+    display:inline-flex;
+    align-items:center;
+    gap:9px;
+    margin-top:28px;
+    font-family:"Space Mono",monospace;
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:0.16em;
+    text-transform:uppercase;
+    color:var(--moss);
+    border:1.6px solid var(--brass);
+    border-radius:6px;
+    padding:9px 16px;
+    transform:rotate(-1.5deg);
+    background:rgba(198,160,83,0.05);
+  }
+  .dev-stamp .dot{
+    width:7px;height:7px;border-radius:50%;
+    background:var(--brass);
+    box-shadow:0 0 0 0 rgba(198,160,83,0.5);
+    animation:pulse 2.6s ease-out infinite;
+    flex-shrink:0;
+  }
+
+  /* row wrapping the stamp + the scroll-to-form nudge */
+  .hero-status-row{
+    display:flex;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:16px;
+    margin-top:28px;
+  }
+  .hero-status-row .dev-stamp{margin-top:0}
+  .notify-nudge{
+    font-family:"Inter",sans-serif;
+    font-size:14px;
+    font-weight:500;
+    color:var(--moss);
+    text-decoration:none;
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    border-bottom:1px solid transparent;
+    transition:border-color .2s, color .2s;
+  }
+  .notify-nudge:hover{color:var(--pine);border-color:var(--pine)}
+  .notify-nudge .arrow-down{
+    display:inline-block;
+    transition:transform .2s var(--ease);
+  }
+  .notify-nudge:hover .arrow-down{transform:translateY(2px)}
+  .notify-nudge:focus-visible{outline:2px solid var(--brass);outline-offset:3px;border-radius:3px}
+
+  .reveal{opacity:0;transform:translateY(14px);animation:rise .8s var(--ease) forwards}
+  .d1{animation-delay:.05s}.d2{animation-delay:.18s}.d3{animation-delay:.32s}.d4{animation-delay:.5s}.d5{animation-delay:.64s}
+  @keyframes rise{to{opacity:1;transform:none}}
+
+  /* ============ product glimpse — feature slides ============ */
+  .glimpse{position:relative}
+  .slides{
+    display:grid;
+    max-width:400px;
+    margin-left:auto;
+  }
+  .slide{
+    grid-area:1/1;
+    opacity:0;
+    transform:translateY(8px) scale(0.985);
+    transition:opacity .7s var(--ease), transform .7s var(--ease);
+    pointer-events:none;
+  }
+  .slide.active{
+    opacity:1;
+    transform:none;
+    pointer-events:auto;
+  }
+  .flag-card{
+    background:var(--card);
+    border:1px solid var(--paper-2);
+    border-radius:14px;
+    box-shadow:
+      0 1px 2px rgba(12,34,28,0.06),
+      0 12px 32px rgba(12,34,28,0.10);
+    padding:22px 24px 20px;
+    transform:rotate(0.6deg);
+    animation:float 7s ease-in-out infinite;
+    transition:box-shadow .3s var(--ease), transform .3s var(--ease);
+    height:100%;
+  }
+  .flag-card:hover{
+    transform:rotate(0deg) translateY(-4px);
+    box-shadow:
+      0 2px 4px rgba(12,34,28,0.07),
+      0 20px 44px rgba(12,34,28,0.14);
+    animation-play-state:paused;
+  }
+  @keyframes float{
+    0%,100%{translate:0 0}
+    50%{translate:0 -6px}
+  }
+  /* feature tabs under the card */
+  .glimpse-tabs{
+    display:flex;
+    justify-content:flex-end;
+    gap:8px;
+    max-width:400px;
+    margin:16px 0 0 auto;
+  }
+  .gtab{
+    font-family:"Space Mono",monospace;
+    font-size:10.5px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--muted);
+    background:transparent;
+    border:1px solid var(--paper-2);
+    border-radius:100px;
+    padding:6px 13px;
+    cursor:pointer;
+    transition:color .25s, border-color .25s, background .25s;
+  }
+  .gtab:hover{border-color:var(--brass)}
+  .gtab.active{
+    color:var(--ink);
+    background:var(--brass);
+    border-color:var(--brass);
+  }
+  .gtab:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+  .flag-head{
+    display:flex;align-items:center;justify-content:space-between;
+    margin-bottom:16px;
+  }
+  .flag-label{
+    font-family:"Space Mono",monospace;
+    font-size:11px;letter-spacing:0.14em;text-transform:uppercase;
+    color:var(--moss);
+  }
+  .flag-badge{
+    font-family:"Space Mono",monospace;
+    font-size:10px;letter-spacing:0.1em;text-transform:uppercase;
+    color:var(--brass);
+    border:1px solid rgba(198,160,83,0.45);
+    border-radius:100px;
+    padding:4px 10px;
+    animation:badge-breathe 3.4s ease-in-out infinite;
+  }
+  @keyframes badge-breathe{
+    0%,100%{border-color:rgba(198,160,83,0.45)}
+    50%{border-color:rgba(198,160,83,0.85)}
+  }
+  .flag-tx{
+    display:flex;align-items:baseline;justify-content:space-between;
+    gap:12px;
+    padding-bottom:14px;
+    border-bottom:1px dashed var(--paper-2);
+  }
+  .flag-vendor{font-weight:600;font-size:15.5px}
+  .flag-cat{font-size:13px;color:var(--muted);margin-top:2px}
+  .flag-amt{
+    font-family:"Space Mono",monospace;
+    font-size:15px;font-weight:700;
+    white-space:nowrap;
+  }
+  .flag-reason{
+    font-size:13.5px;
+    color:var(--muted);
+    padding:14px 0 16px;
+    line-height:1.5;
+  }
+  .flag-reason strong{color:var(--text);font-weight:600}
+  .confidence-row{
+    display:flex;align-items:center;gap:10px;
+    padding:14px 0 2px;
+    font-size:12px;
+  }
+  .confidence-label{
+    font-family:"Space Mono",monospace;
+    font-size:10.5px;letter-spacing:0.08em;text-transform:uppercase;
+    color:var(--muted);
+    white-space:nowrap;
+  }
+  .confidence-bar{
+    flex:1;
+    height:5px;
+    border-radius:3px;
+    background:var(--paper-2);
+    overflow:hidden;
+  }
+  .confidence-fill{
+    height:100%;
+    width:62%;
+    border-radius:3px;
+    background:linear-gradient(90deg,var(--brass),#D9A441);
+  }
+  .confidence-pct{
+    font-family:"Space Mono",monospace;
+    font-weight:700;font-size:12.5px;
+    color:var(--text);
+    white-space:nowrap;
+  }
+  .flag-actions{display:flex;gap:10px;align-items:center}
+  .btn-edit-link{
+    font-family:"Inter",sans-serif;
+    font-size:13px;font-weight:500;
+    color:var(--muted);
+    text-decoration:none;
+    border-bottom:1px dashed var(--paper-2);
+    padding-bottom:1px;
+    margin-left:2px;
+    cursor:default;
+  }
+  .btn{
+    font-family:"Inter",sans-serif;
+    font-size:13.5px;font-weight:500;
+    border-radius:8px;
+    padding:8px 18px;
+    border:1px solid transparent;
+    cursor:default;
+  }
+  .btn.approve{background:var(--pine);color:var(--paper-on-dark)}
+  .btn.reject{background:transparent;color:var(--muted);border-color:var(--paper-2)}
+  .flag-foot{
+    margin-top:16px;
+    font-family:"Space Mono",monospace;
+    font-size:10.5px;letter-spacing:0.06em;
+    color:var(--muted);
+    display:flex;align-items:center;gap:8px;
+  }
+  .flag-foot::before{
+    content:"";width:6px;height:6px;border-radius:50%;
+    background:var(--moss);flex-shrink:0;
+  }
+  /* single-actor attribution row (Review / Proposals cards) */
+  .flag-by{
+    display:flex;align-items:center;gap:9px;
+    margin-bottom:14px;
+  }
+  .flag-by .avatar{width:24px;height:24px;font-size:9.5px}
+  .flag-by-text{font-size:12.5px;color:var(--muted)}
+  .flag-by-text strong{color:var(--text);font-weight:600}
+
+  /* Data In card */
+  .sync-line{
+    display:flex;align-items:center;gap:10px;
+    padding-bottom:14px;
+    border-bottom:1px dashed var(--paper-2);
+    font-size:13.5px;
+    color:var(--muted);
+  }
+  .sync-line strong{color:var(--text);font-weight:600}
+  .sync-count{
+    font-family:"Space Mono",monospace;
+    font-weight:700;
+    color:var(--moss);
+  }
+  .sync-arrow{color:var(--brass);flex-shrink:0}
+  .check-tags{
+    display:flex;flex-direction:column;gap:0;
+    padding:14px 0 4px;
+  }
+  .check-tag{
+    display:flex;align-items:center;gap:10px;
+    padding:9px 0;
+    font-size:13.5px;
+    color:var(--muted);
+    opacity:0.4;
+    transition:opacity .5s ease;
+  }
+  .check-tag.lit{opacity:1;color:var(--text)}
+  .check-tag .tag-dot{
+    width:18px;height:18px;
+    flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .check-tag .tag-dot svg{width:100%;height:100%}
+  .check-tag .tag-dot circle{
+    fill:none;
+    stroke:var(--paper-2);
+    stroke-width:1.6;
+    transition:stroke .5s ease;
+  }
+  .check-tag .tag-dot path{
+    fill:none;
+    stroke:var(--moss);
+    stroke-width:1.8;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+    stroke-dasharray:16;
+    stroke-dashoffset:16;
+    transition:stroke-dashoffset .4s ease .1s;
+  }
+  .check-tag.lit .tag-dot circle{stroke:var(--moss)}
+  .check-tag.lit .tag-dot path{stroke-dashoffset:0}
+  /* alert variant: red X — a compliance issue needing review */
+  .check-tag.alert .tag-dot path{
+    stroke-dasharray:17;
+    stroke-dashoffset:17;
+    stroke:#B5493A;
+  }
+  .check-tag.alert .tag-dot circle{stroke:var(--paper-2)}
+  .check-tag.alert.lit .tag-dot circle{stroke:#B5493A}
+  /* suggest variant: brass X — an opportunity, not a problem */
+  .check-tag.suggest .tag-dot path{
+    stroke-dasharray:17;
+    stroke-dashoffset:17;
+    stroke:var(--brass);
+  }
+  .check-tag.suggest .tag-dot circle{stroke:var(--paper-2)}
+  .check-tag.suggest.lit .tag-dot circle{stroke:var(--brass)}
+  .tag-badge{
+    font-family:"Space Mono",monospace;
+    font-size:10px;letter-spacing:0.08em;text-transform:uppercase;
+    border-radius:100px;
+    padding:2px 9px;
+    margin-left:auto;
+    opacity:0;
+    transition:opacity .4s ease .1s;
+  }
+  .check-tag.alert .tag-badge{color:#B5493A;border:1px solid rgba(181,73,58,0.4)}
+  .check-tag.suggest .tag-badge{color:var(--brass);border:1px solid rgba(198,160,83,0.45)}
+  .tag-badge.good{color:var(--moss);border:1px solid rgba(62,124,104,0.4)}
+  .check-tag.alert.lit .tag-badge,.check-tag.suggest.lit .tag-badge,.check-tag.lit .tag-badge.good{opacity:1}
+  .thread-item{
+    display:flex;gap:12px;align-items:flex-start;
+    padding:14px 0;
+  }
+  .thread-item + .thread-item{border-top:1px dashed var(--paper-2)}
+  .avatar{
+    width:30px;height:30px;flex-shrink:0;
+    border-radius:50%;
+    background:var(--pine);
+    color:var(--paper-on-dark);
+    font-family:"Space Mono",monospace;
+    font-size:11px;font-weight:700;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .avatar.ai{background:var(--moss)}
+  .avatar.person2{background:var(--brass);color:var(--ink)}
+  .avatar.person3{background:#6B7280;color:var(--paper-on-dark)}
+  .avatar svg{width:60%;height:60%}
+  .avatar svg path,.avatar svg circle{
+    fill:none;
+    stroke:currentColor;
+    stroke-width:1.8;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+  }
+  .ws-slides{display:grid}
+  .ws-slide{grid-area:1/1;opacity:0;transform:translateY(6px);transition:opacity .6s var(--ease),transform .6s var(--ease);pointer-events:none}
+  .ws-slide.active{opacity:1;transform:none;pointer-events:auto}
+  .ws-tabs{
+    display:flex;gap:8px;
+    margin-top:16px;
+  }
+  .ws-tab{
+    font-family:"Space Mono",monospace;
+    font-size:10.5px;letter-spacing:0.08em;text-transform:uppercase;
+    color:var(--muted);
+    background:transparent;
+    border:1px solid var(--paper-2);
+    border-radius:100px;
+    padding:6px 13px;
+    cursor:pointer;
+    transition:color .25s,border-color .25s,background .25s;
+  }
+  .ws-tab:hover{border-color:var(--brass)}
+  .ws-tab.active{color:var(--ink);background:var(--brass);border-color:var(--brass)}
+  .ws-tab:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+  .thread-who{font-size:13px;font-weight:600}
+  .thread-who .role{font-weight:400;color:var(--muted);font-size:12px;margin-left:6px}
+  .thread-text{font-size:13.5px;color:var(--muted);margin-top:2px;line-height:1.5}
+  .thread-resolved{
+    display:inline-flex;align-items:center;gap:6px;
+    margin-top:10px;
+    font-family:"Space Mono",monospace;
+    font-size:10px;letter-spacing:0.1em;text-transform:uppercase;
+    color:var(--moss);
+    border:1px solid rgba(62,124,104,0.4);
+    border-radius:100px;
+    padding:4px 10px;
+  }
+  .glimpse-caption{
+    font-family:"Space Mono",monospace;
+    font-size:9.5px;letter-spacing:0.08em;text-transform:uppercase;
+    color:var(--muted);
+    text-align:right;
+    max-width:400px;
+    margin:10px 0 0 auto;
+  }
+
+  /* ============ ledger (dark) ============ */
+  .ledger-section{
+    position:relative;
+    background:var(--ink);
+    color:var(--paper-on-dark);
+    padding:104px 0;
+    overflow:hidden;
+  }
+  .ledger-section .motif{
+    position:absolute;
+    right:-40px;top:30px;
+    width:min(62vw,660px);
+    height:auto;
+    opacity:0.07;
+    pointer-events:none;
+  }
+  /* sparkline draws itself when the section scrolls into view */
+  html.js .motif .spark{
+    stroke-dasharray:1;
+    stroke-dashoffset:1;
+    transition:stroke-dashoffset 2.4s var(--ease) .3s;
+  }
+  html.js .ledger-section.in .motif .spark{stroke-dashoffset:0}
+  html.js .motif circle{
+    opacity:0;
+    transition:opacity .6s ease;
+  }
+  html.js .ledger-section.in .motif circle{opacity:1}
+  html.js .ledger-section.in .motif circle:nth-of-type(1){transition-delay:.9s}
+  html.js .ledger-section.in .motif circle:nth-of-type(2){transition-delay:1.4s}
+  html.js .ledger-section.in .motif circle:nth-of-type(3){transition-delay:1.9s}
+  html.js .ledger-section.in .motif circle:nth-of-type(4){transition-delay:2.4s}
+
+  .ledger-section .wrap{position:relative;z-index:1}
+  .ledger-section .eyebrow{color:var(--brass)}
+  .section-intro{
+    margin:18px 0 52px;
+    font-size:clamp(18px,2.4vw,23px);
+    font-family:"Fraunces",serif;
+    font-weight:400;
+    line-height:1.4;
+    max-width:none;
+    color:var(--paper-on-dark);
+  }
+  .ledger{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    border-top:1px solid var(--line-dark);
+  }
+  .ledger .col{padding-top:28px}
+  .ledger .col.left{padding-right:44px;border-right:1px solid var(--line-dark)}
+  .ledger .col.right{padding-left:44px}
+  .col-head{
+    font-family:"Space Mono",monospace;
+    font-size:12px;letter-spacing:0.12em;text-transform:uppercase;
+    color:var(--muted-on-dark);
+    margin-bottom:20px;
+  }
+  .row{
+    display:flex;gap:14px;align-items:flex-start;
+    padding:16px 0;
+    border-bottom:1px solid var(--line-dark);
+    font-size:15.5px;
+  }
+  /* expandable drawer rows (left column only) */
+  .row.expandable{
+    flex-direction:column;
+    padding:0;
+    border-bottom:1px solid var(--line-dark);
+  }
+  .row-trigger{
+    display:flex;align-items:center;gap:14px;
+    width:100%;
+    padding:16px 0;
+    background:none;
+    border:none;
+    color:inherit;
+    font-family:inherit;
+    font-size:15.5px;
+    text-align:left;
+    cursor:pointer;
+  }
+  .row-trigger:focus-visible{
+    outline:2px solid var(--brass);outline-offset:3px;border-radius:4px;
+  }
+  .tick-btn{
+    font-family:"Space Mono",monospace;
+    color:var(--brass);
+    flex-shrink:0;line-height:1.5;
+    width:16px;
+    display:inline-block;
+    transition:transform .3s var(--ease);
+  }
+  .row-trigger[aria-expanded="true"] .tick-btn{transform:rotate(45deg)}
+  .row-label{flex:1}
+  .row-chevron{
+    color:var(--muted-on-dark);
+    font-size:12px;
+    flex-shrink:0;
+    transition:transform .3s var(--ease);
+  }
+  .row-trigger[aria-expanded="true"] .row-chevron{transform:rotate(180deg)}
+  .row-drawer{
+    display:grid;
+    grid-template-rows:0fr;
+    transition:grid-template-rows .35s var(--ease);
+  }
+  .row-drawer-inner{overflow:hidden}
+  .row-drawer-content{
+    padding:0 0 20px 30px;
+    font-size:14px;
+    line-height:1.6;
+    color:var(--muted-on-dark);
+    max-width:46ch;
+  }
+  .row.open .row-drawer{grid-template-rows:1fr}
+  /* ledger rows cascade in like entries being written */
+  html.js .ledger .row{
+    opacity:0;
+    transform:translateX(-10px);
+    transition:opacity .7s var(--ease), transform .7s var(--ease);
+  }
+  html.js .ledger-section.in .row{opacity:1;transform:none}
+  html.js .ledger-section.in .col.left .row:nth-child(2){transition-delay:.15s}
+  html.js .ledger-section.in .col.left .row:nth-child(3){transition-delay:.3s}
+  html.js .ledger-section.in .col.left .row:nth-child(4){transition-delay:.45s}
+  html.js .ledger-section.in .col.left .row:nth-child(5){transition-delay:.6s}
+  html.js .ledger-section.in .col.left .row:nth-child(6){transition-delay:.75s}
+  html.js .ledger-section.in .col.right .row:nth-child(2){transition-delay:.9s}
+  html.js .ledger-section.in .col.right .row:nth-child(3){transition-delay:1.05s}
+  html.js .ledger-section.in .col.right .row:nth-child(4){transition-delay:1.2s}
+  html.js .ledger-section.in .col.right .row:nth-child(5){transition-delay:1.35s}
+  .tick{
+    font-family:"Space Mono",monospace;
+    color:var(--brass);
+    flex-shrink:0;line-height:1.5;
+  }
+  .col.right .tick{color:var(--muted-on-dark)}
+  .col.right .row{color:var(--muted-on-dark)}
+  .col.right .tick-btn{color:var(--muted-on-dark)}
+  .col.right .row-chevron{color:var(--muted-on-dark);opacity:0.6}
+
+  /* ============ how it works — living timeline ============ */
+  .how{padding:104px 0}
+  .how-eyebrow{display:block;text-align:center}
+  .tl{
+    position:relative;
+    margin-top:64px;
+  }
+  /* the line of time */
+  .tl-track{
+    position:absolute;
+    top:27px;left:27px;right:27px;
+    height:2px;
+    background:var(--paper-2);
+    border-radius:2px;
+  }
+  .tl-progress{
+    position:absolute;
+    top:0;left:0;height:100%;
+    width:0;
+    background:linear-gradient(90deg,var(--moss),var(--brass));
+    border-radius:2px;
+  }
+  html.js .how.in .tl-progress{
+    width:100%;
+    transition:width 2.2s var(--ease) .2s;
+  }
+  /* a small light travelling along the line */
+  .tl-spark{
+    position:absolute;
+    top:50%;left:0;
+    width:10px;height:10px;
+    margin:-5px 0 0 -5px;
+    border-radius:50%;
+    background:var(--brass);
+    box-shadow:0 0 12px 2px rgba(198,160,83,0.55);
+    opacity:0;
+  }
+  html.js .how.in .tl-spark{
+    animation:travel 2.2s var(--ease) .2s forwards;
+  }
+  @keyframes travel{
+    0%{left:0;opacity:0}
+    8%{opacity:1}
+    92%{opacity:1}
+    100%{left:100%;opacity:0}
+  }
+
+  .how-grid{
+    position:relative;
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:32px;
+  }
+  .how-step{position:relative}
+  .node{
+    position:relative;z-index:1;
+    width:54px;height:54px;
+    border-radius:50%;
+    background:var(--paper);
+    border:1.6px solid var(--paper-2);
+    display:flex;align-items:center;justify-content:center;
+    margin-bottom:24px;
+    transition:border-color .5s ease, box-shadow .5s ease;
+  }
+  html.js .how.in .how-step:nth-child(1) .node{transition-delay:.25s}
+  html.js .how.in .how-step:nth-child(2) .node{transition-delay:.95s}
+  html.js .how.in .how-step:nth-child(3) .node{transition-delay:1.65s}
+  html.js .how.in .how-step:nth-child(4) .node{transition-delay:2.35s}
+  html.js .how.in .node{
+    border-color:var(--brass);
+    box-shadow:0 0 0 5px rgba(198,160,83,0.12);
+  }
+  .how-icon{width:26px;height:26px;display:block}
+  .how-icon path,.how-icon circle,.how-icon line{
+    fill:none;
+    stroke:var(--brass);
+    stroke-width:1.6;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+  }
+  html.js .how-step .step-body{
+    opacity:0;
+    transform:translateY(14px);
+    transition:opacity .8s var(--ease), transform .8s var(--ease);
+  }
+  html.js .how.in .how-step:nth-child(1) .step-body{opacity:1;transform:none;transition-delay:.35s}
+  html.js .how.in .how-step:nth-child(2) .step-body{opacity:1;transform:none;transition-delay:1.05s}
+  html.js .how.in .how-step:nth-child(3) .step-body{opacity:1;transform:none;transition-delay:1.75s}
+  html.js .how.in .how-step:nth-child(4) .step-body{opacity:1;transform:none;transition-delay:2.45s}
+  .how-num{
+    font-family:"Space Mono",monospace;
+    font-size:12px;color:var(--brass);letter-spacing:0.1em;
+  }
+  .how-step h3{
+    font-family:"Fraunces",serif;font-weight:500;
+    font-size:21px;margin:12px 0 10px;letter-spacing:-0.01em;
+  }
+  .how-step p{color:var(--muted);font-size:14.5px;max-width:30ch}
+  .how-note{
+    margin-top:36px;
+    text-align:center;
+    font-family:"Space Mono",monospace;
+    font-size:12px;
+    letter-spacing:0.03em;
+    color:var(--muted);
+  }
+
+  /* ============ workspace section ============ */
+  .workspace{padding:40px 0 104px}
+  .workspace .wrap{
+    display:grid;
+    grid-template-columns:minmax(0,0.95fr) minmax(0,1.05fr);
+    gap:64px;
+    align-items:start;
+  }
+  .workspace-copy h2{
+    font-family:"Fraunces",serif;font-weight:500;
+    font-size:clamp(24px,3.2vw,32px);letter-spacing:-0.01em;
+    line-height:1.2;
+    margin:16px 0 18px;
+    max-width:16ch;
+  }
+  .workspace-copy p{
+    color:var(--muted);
+    font-size:16px;
+    max-width:44ch;
+    margin-bottom:14px;
+  }
+  .workspace-copy p:last-of-type{margin-bottom:0}
+
+  .ws-card{
+    background:var(--card);
+    border:1px solid var(--paper-2);
+    border-radius:14px;
+    box-shadow:0 1px 2px rgba(12,34,28,0.05),0 16px 40px rgba(12,34,28,0.08);
+    overflow:hidden;
+  }
+  .ws-card-head{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:16px 22px;
+    border-bottom:1px solid var(--paper-2);
+  }
+  .ws-client{
+    display:flex;align-items:center;gap:10px;
+    font-size:14px;font-weight:600;
+  }
+  .ws-client-dot{width:7px;height:7px;border-radius:50%;background:var(--moss)}
+  .ws-chips{display:flex;gap:8px}
+  .ws-chip{
+    font-family:"Space Mono",monospace;
+    font-size:10px;letter-spacing:0.06em;text-transform:uppercase;
+    color:var(--moss);
+    border:1px solid rgba(62,124,104,0.35);
+    border-radius:100px;
+    padding:4px 10px;
+  }
+  .ws-body{padding:20px 22px 22px}
+  .ws-entry{padding-bottom:16px}
+  .ws-entry + .ws-entry{
+    margin-top:16px;
+    padding-top:16px;
+    border-top:1px dashed var(--paper-2);
+  }
+  .ws-replies{
+    margin:14px 0 0 41px;
+    padding-left:20px;
+    border-left:2px solid var(--paper-2);
+  }
+  .ws-reply-item{padding:12px 0}
+  .ws-reply-item + .ws-reply-item{border-top:1px dashed var(--paper-2)}
+  .ws-reply-item .ws-entry-head{gap:9px}
+  .ws-reply-item .avatar{width:24px;height:24px;font-size:9.5px}
+  .ws-reply-item .ws-who{font-size:13px}
+  .ws-entry-head{display:flex;gap:11px;align-items:flex-start}
+  .ws-entry-body{flex:1}
+  .ws-earlier{
+    margin:10px 0 0 41px;
+    font-size:12px;
+    color:var(--muted);
+  }
+  .ws-earlier a{
+    color:var(--moss);
+    text-decoration:none;
+    border-bottom:1px dashed rgba(62,124,104,0.4);
+  }
+  .ws-who{font-size:13.5px;font-weight:600}
+  .ws-who .ws-role{font-weight:400;color:var(--muted);font-size:12.5px;margin-left:6px}
+  .ws-when{
+    margin-left:auto;
+    font-family:"Space Mono",monospace;
+    font-size:11px;color:var(--muted);
+    white-space:nowrap;
+  }
+  .ws-text{font-size:13.5px;color:var(--muted);margin-top:3px;line-height:1.5}
+  .ws-actions{
+    display:flex;gap:14px;align-items:center;
+    margin:10px 0 0 41px;
+    font-family:"Space Mono",monospace;
+    font-size:11px;letter-spacing:0.04em;
+    color:var(--muted);
+  }
+  .ws-actions .resolved-chip{
+    color:var(--moss);
+    border:1px solid rgba(62,124,104,0.4);
+    border-radius:100px;
+    padding:3px 9px;
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+    font-size:10px;
+  }
+  .ws-reply{
+    margin:14px 0 0 0;
+    display:flex;gap:9px;
+    padding:9px 12px;
+    background:var(--paper);
+    border:1px solid var(--paper-2);
+    border-radius:9px;
+  }
+  .ws-reply-input{
+    flex:1;
+    font-family:"Inter",sans-serif;
+    font-size:12.5px;
+    color:var(--muted);
+  }
+  .ws-reply-send{
+    font-family:"Inter",sans-serif;
+    font-size:11.5px;font-weight:500;
+    color:var(--paper-on-dark);
+    background:var(--pine);
+    border-radius:6px;
+    padding:5px 12px;
+  }
+
+  @media (max-width:840px){
+    .workspace .wrap{grid-template-columns:1fr;gap:40px}
+  }
+  @media (max-width:640px){
+    .org-node{flex-wrap:wrap}
+    .org-role{width:auto}
+    .org-arrow{display:none}
+    .org-desc{flex-basis:100%;margin-left:44px;margin-top:2px}
+  }
+  @media (max-width:520px){
+    .ws-actions{margin-left:0}
+    .ws-replies{margin-left:0;padding-left:14px}
+    .ws-chips{display:none}
+    .org-level-2{margin-left:16px}
+    .org-level-3{margin-left:32px}
+    .org-level-4{margin-left:48px}
+    .org-extra{margin-left:48px}
+    .org-desc{font-size:12.5px;margin-left:0;flex-basis:auto}
+  }
+  /* ============ who ============ */
+  .who{padding:0}
+  .who .wrap{
+    border-top:1px solid var(--paper-2);
+    padding-top:96px;
+    text-align:center;
+  }
+  .who h2{
+    font-family:"Fraunces",serif;font-weight:500;
+    font-size:clamp(24px,3.4vw,34px);letter-spacing:-0.01em;
+    margin:18px auto;max-width:34ch;line-height:1.15;
+  }
+  .who p{color:var(--muted);max-width:52ch;font-size:17px;margin:0 auto}
+
+  /* org tree */
+  .org-tree{
+    margin:44px auto 0;
+    max-width:640px;
+    text-align:left;
+  }
+  .org-node{
+    position:relative;
+    display:flex;
+    align-items:center;
+    gap:14px;
+    background:var(--card);
+    border:1px solid var(--paper-2);
+    border-radius:12px;
+    padding:12px 18px;
+    box-shadow:0 1px 2px rgba(12,34,28,0.04);
+  }
+  /* each successive level steps inward, echoing a nested tree */
+  .org-item{position:relative}
+  .org-item + .org-item{margin-top:8px}
+  .org-level-2{margin-left:20px}
+  .org-level-3{margin-left:40px}
+  .org-level-4{margin-left:60px}
+  /* elbow connector: a short brass line from the parent down into each child */
+  .org-item.child::before{
+    content:"";
+    position:absolute;
+    left:-11px;top:-8px;
+    width:2px;height:26px;
+    background:var(--brass);
+    opacity:0.45;
+  }
+  .org-item.child::after{
+    content:"";
+    position:absolute;
+    left:-11px;top:18px;
+    width:11px;height:2px;
+    background:var(--brass);
+    opacity:0.45;
+  }
+
+  .org-badge{
+    flex-shrink:0;
+    width:30px;height:30px;
+    border-radius:8px;
+    background:var(--ink);
+    color:var(--brass);
+    display:flex;align-items:center;justify-content:center;
+    font-family:"Space Mono",monospace;
+    font-size:11px;font-weight:700;
+  }
+  .org-role{
+    flex-shrink:0;
+    width:128px;
+    font-family:"Fraunces",serif;
+    font-weight:500;font-size:15px;
+    letter-spacing:-0.01em;
+    line-height:1.25;
+  }
+  .org-arrow{
+    flex-shrink:0;
+    color:var(--brass);
+    opacity:0.6;
+    font-size:14px;
+  }
+  .org-desc{
+    flex:1;
+    font-size:12.5px;
+    color:var(--muted);
+    line-height:1.4;
+  }
+  .org-extra{
+    margin:8px 0 0 60px;
+    padding-left:16px;
+    position:relative;
+    font-family:"Space Mono",monospace;
+    font-size:11px;
+    letter-spacing:0.04em;
+    color:var(--muted);
+  }
+  .org-extra::before{
+    content:"+";
+    position:absolute;left:0;
+    color:var(--brass);
+  }
+
+  /* nodes rise in, level by level */
+  html.js .org-item{
+    opacity:0;
+    transform:translateY(12px);
+    transition:opacity .6s var(--ease), transform .6s var(--ease);
+  }
+  html.js .who.in .org-item{opacity:1;transform:none}
+  html.js .who.in .org-level-1{transition-delay:.2s}
+  html.js .who.in .org-level-2{transition-delay:.55s}
+  html.js .who.in .org-level-3{transition-delay:.9s}
+  html.js .who.in .org-level-4{transition-delay:1.25s}
+
+  /* ============ commitments ============ */
+  .commit{padding:56px 0 104px}
+  .commit-grid{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:24px;
+  }
+  .commit-grid .item{
+    background:var(--card);
+    border:1px solid var(--paper-2);
+    border-radius:14px;
+    padding:34px 30px 32px;
+    text-align:center;
+    box-shadow:0 1px 2px rgba(12,34,28,0.04);
+    transition:transform .4s var(--ease), box-shadow .4s var(--ease);
+  }
+  .commit-grid .item:hover{
+    transform:translateY(-4px);
+    box-shadow:0 2px 4px rgba(12,34,28,0.05), 0 16px 36px rgba(12,34,28,0.10);
+  }
+  .num{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:42px;height:42px;
+    border-radius:50%;
+    border:1.6px solid var(--brass);
+    font-family:"Space Mono",monospace;font-size:12px;
+    color:var(--brass);letter-spacing:0.08em;
+  }
+  .item h3{
+    font-family:"Fraunces",serif;font-weight:500;
+    font-size:20px;margin:18px 0 10px;letter-spacing:-0.01em;
+  }
+  .item p{color:var(--muted);font-size:15px;max-width:30ch;margin:0 auto}
+
+  /* ============ notify form ============ */
+  .notify{
+    margin-top:40px;
+    padding-top:36px;
+    border-top:1px solid var(--line-dark);
+    max-width:440px;
+    margin-left:auto;
+    margin-right:auto;
+    text-align:center;
+  }
+  .notify-label{
+    font-family:"Fraunces",serif;
+    font-weight:500;
+    font-size:19px;
+    color:var(--paper-on-dark);
+    margin-bottom:6px;
+  }
+  .notify-sub{
+    font-size:14.5px;
+    color:var(--muted-on-dark);
+    margin-bottom:18px;
+  }
+  .notify-form{display:flex;gap:10px;text-align:left}
+  .notify-input{
+    flex:1;min-width:0;
+    font-family:"Inter",sans-serif;
+    font-size:15px;
+    color:var(--paper-on-dark);
+    background:rgba(233,237,228,0.06);
+    border:1px solid rgba(233,237,228,0.22);
+    border-radius:8px;
+    padding:12px 14px;
+    transition:border-color .2s, background .2s;
+  }
+  .notify-input::placeholder{color:var(--muted-on-dark)}
+  .notify-input:focus{
+    outline:none;
+    border-color:var(--brass);
+    background:rgba(233,237,228,0.09);
+  }
+  .notify-input:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+  .notify-btn{
+    font-family:"Inter",sans-serif;
+    font-size:15px;font-weight:500;
+    color:var(--ink);
+    background:var(--brass);
+    border:1px solid var(--brass);
+    border-radius:8px;
+    padding:12px 22px;
+    white-space:nowrap;
+    cursor:pointer;
+    transition:background .15s,transform .1s;
+  }
+  .notify-btn:hover{background:#D3AE63}
+  .notify-btn:active{transform:translateY(1px)}
+  .notify-btn:disabled{opacity:0.6;cursor:default}
+  .notify-btn:focus-visible{outline:2px solid var(--paper-on-dark);outline-offset:2px}
+  .notify-msg{
+    margin-top:12px;
+    font-family:"Space Mono",monospace;
+    font-size:12.5px;
+    letter-spacing:0.02em;
+    min-height:16px;
+  }
+  .notify-msg.err{color:#E8B4A0}
+  .notify.done .notify-form,.notify.done .notify-msg{display:none}
+  .notify-success{
+    display:none;
+    align-items:center;gap:10px;
+    font-size:15px;
+    color:var(--paper-on-dark);
+  }
+  .notify.done .notify-success{display:flex;justify-content:center;animation:rise .6s var(--ease)}
+  .notify-success .check{width:20px;height:20px;flex-shrink:0}
+  .notify-success .check circle{fill:none;stroke:var(--brass);stroke-width:1.6}
+  .notify-success .check path{fill:none;stroke:var(--brass);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+
+  /* ============ footer ============ */
+  footer{
+    position:relative;
+    background:var(--pine);
+    color:var(--paper-on-dark);
+    padding:88px 0 44px;
+    overflow:hidden;
+  }
+  footer::before{
+    content:"";position:absolute;inset:0;z-index:0;
+    background:repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent 37px,
+      rgba(233,237,228,0.05) 37px,
+      rgba(233,237,228,0.05) 38px
+    );
+    -webkit-mask-image:linear-gradient(to top,rgba(0,0,0,0.9),transparent 78%);
+    mask-image:linear-gradient(to top,rgba(0,0,0,0.9),transparent 78%);
+  }
+  footer .wrap{position:relative;z-index:1}
+  footer .eyebrow{color:var(--brass);display:block;text-align:center}
+  .status-line{
+    font-family:"Fraunces",serif;font-weight:400;
+    font-size:clamp(20px,2.8vw,28px);line-height:1.4;
+    margin:18px auto 8px;max-width:56ch;text-align:center;
+  }
+  .foot-rule{
+    margin-top:60px;padding-top:24px;
+    border-top:1px solid var(--line-dark);
+    display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;
+    font-family:"Space Mono",monospace;font-size:12px;
+    letter-spacing:0.06em;color:var(--muted-on-dark);
+  }
+  .foot-mail{
+    color:var(--muted-on-dark);
+    text-decoration:none;
+    border-bottom:1px solid rgba(198,160,83,0.5);
+    padding-bottom:1px;
+    transition:color .2s;
+  }
+  .foot-mail:hover{color:var(--brass)}
+
+  a:focus-visible,.status-pill:focus-visible{
+    outline:2px solid var(--brass);outline-offset:3px;border-radius:4px;
+  }
+
+  /* ============ responsive ============ */
+  @media (max-width:840px){
+    .hero .wrap{grid-template-columns:1fr;gap:48px}
+    .slides{margin-left:0}
+    .flag-card{transform:none}
+    .glimpse-tabs{justify-content:flex-start;margin-left:0}
+    .glimpse-caption{text-align:left;margin-left:0}
+  }
+  @media (max-width:720px){
+    .hero{padding-bottom:88px}
+    .ledger-section{padding:88px 0}
+    .ledger{grid-template-columns:1fr}
+    .ledger .col.left{padding-right:0;border-right:none;padding-bottom:16px}
+    .ledger .col.right{padding-left:0;border-top:1px solid var(--line-dark);margin-top:22px;padding-top:28px}
+    .ledger-section .motif{width:120vw;right:-30vw;top:10px}
+
+    /* timeline goes vertical: the line runs down the left side */
+    .how{padding:88px 0}
+    .tl{margin-top:52px}
+    .tl-track{
+      top:27px;bottom:27px;left:26px;right:auto;
+      width:2px;height:auto;
+    }
+    .tl-progress{
+      width:100%;height:0;
+      background:linear-gradient(180deg,var(--moss),var(--brass));
+    }
+    html.js .how.in .tl-progress{
+      width:100%;height:100%;
+      transition:height 2.2s var(--ease) .2s;
+    }
+    .tl-spark{display:none}
+    .how-grid{grid-template-columns:1fr;gap:44px}
+    .how-step{
+      display:grid;
+      grid-template-columns:54px 1fr;
+      gap:22px;
+      align-items:start;
+    }
+    .node{margin-bottom:0}
+    .how-step p{max-width:none}
+
+    .who .wrap{padding-top:76px}
+    .commit{padding:48px 0 88px}
+    .commit-grid{grid-template-columns:1fr;gap:18px}
+    .commit-grid .item{padding:30px 26px 28px}
+    .commit-grid .item:hover{transform:none;box-shadow:0 1px 2px rgba(12,34,28,0.04)}
+    footer{padding:72px 0 40px}
+  }
+  @media (max-width:520px){
+    .notify-form{flex-direction:column}
+    .notify-btn{width:100%}
+  }
+
+  /* ============ reduced motion: everything visible, nothing moves ============ */
+  @media (prefers-reduced-motion:reduce){
+    .reveal{opacity:1;transform:none;animation:none}
+    .dot,.flag-badge{animation:none}
+    .flag-card{animation:none}
+    html.js .sr{opacity:1;transform:none;transition:none}
+    .slide{transition:none;transform:none}
+    .ws-slide{transition:none;transform:none}
+    html.js .org-item{opacity:1;transform:none;transition:none}
+    html.js .motif .spark{stroke-dasharray:none;stroke-dashoffset:0;transition:none}
+    html.js .motif circle{opacity:1;transition:none}
+    html.js .ledger .row{opacity:1;transform:none;transition:none}
+    html.js .how .tl-progress{width:100%;height:100%;transition:none}
+    html.js .how .tl-spark{display:none}
+    html.js .how .node{border-color:var(--brass);box-shadow:none;transition:none}
+    html.js .how-step .step-body{opacity:1;transform:none;transition:none}
+    .commit-grid .item,.flag-card:hover{transition:none;transform:none}
+    html{scroll-behavior:auto}
+  }
+</style>
+</head>
+<body>
+
+  <div class="wrap">
+    <nav>
+      <span class="mark">UpperBooks</span>
+    </nav>
+  </div>
+
+  <header class="hero">
+    <div class="wrap">
+      <div>
+        <span class="eyebrow reveal d1">Built for bookkeeping practices</span>
+        <h1 class="reveal d2">An AI advisory layer<br><span class="soft">over your accounting software.</span></h1>
+        <p class="lede reveal d3">UpperBooks spots what needs a human's attention — so you don't have to dig for it.</p>
+        <div class="hero-status-row reveal d5">
+          <div class="dev-stamp"><span class="dot"></span>In active development</div>
+          <a class="notify-nudge" href="#notifyBlock">Send me an email at launch <span class="arrow-down" aria-hidden="true">↓</span></a>
+        </div>
+      </div>
+
+      <div class="glimpse reveal d4" aria-label="Illustrations of UpperBooks features">
+        <div class="slides" id="glimpseSlides">
+
+          <!-- Slide 1: data in -->
+          <div class="slide active" data-slide="0">
+            <div class="flag-card">
+              <div class="flag-head">
+                <span class="flag-label">Overview</span>
+                <span class="flag-badge">Syncing</span>
+              </div>
+              <div class="sync-line">
+                <span>Your books</span>
+                <span class="sync-arrow">→</span>
+                <span><strong>UpperBooks</strong> reviewed <span class="sync-count">214</span> transactions today</span>
+              </div>
+              <div class="check-tags" id="dataInTags">
+                <div class="check-tag suggest" data-tag="0"><span class="tag-dot"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="8.5"/><path d="M7 7 L13 13 M13 7 L7 13"/></svg></span>Transaction categorization<span class="tag-badge">Needs review</span></div>
+                <div class="check-tag" data-tag="1"><span class="tag-dot"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="8.5"/><path d="M6 10.5 L8.7 13 L14 7.5"/></svg></span>IRS compliance<span class="tag-badge good">Monitored</span></div>
+                <div class="check-tag suggest" data-tag="2"><span class="tag-dot"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="8.5"/><path d="M7 7 L13 13 M13 7 L7 13"/></svg></span>Proposals<span class="tag-badge">Proposal</span></div>
+                <div class="check-tag" data-tag="3"><span class="tag-dot"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="8.5"/><path d="M6 10.5 L8.7 13 L14 7.5"/></svg></span>Bookkeeping best practices<span class="tag-badge good">Monitored</span></div>
+                <div class="check-tag suggest" data-tag="4"><span class="tag-dot"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="8.5"/><path d="M7 7 L13 13 M13 7 L7 13"/></svg></span>Accounts payable<span class="tag-badge">Needs attention</span></div>
+              </div>
+              <div class="flag-foot">Checked against every rule — a person approves what's flagged</div>
+            </div>
+          </div>
+
+          <!-- Slide 2: transaction categorization -->
+          <div class="slide" data-slide="1">
+            <div class="flag-card">
+              <div class="flag-head">
+                <span class="flag-label">Transaction categorization</span>
+                <span class="flag-badge">Needs review</span>
+              </div>
+              <div class="flag-by">
+                <div class="avatar ai">AI</div>
+                <span class="flag-by-text">Suggested by <strong>UpperBooks</strong></span>
+              </div>
+              <div class="flag-tx">
+                <div>
+                  <div class="flag-vendor">Riverside Grill</div>
+                  <div class="flag-cat">Meals &amp; Entertainment</div>
+                </div>
+                <div class="flag-amt">$184.20</div>
+              </div>
+              <div class="confidence-row">
+                <span class="confidence-label">Confidence</span>
+                <div class="confidence-bar"><div class="confidence-fill"></div></div>
+                <span class="confidence-pct">62%</span>
+              </div>
+              <p class="flag-reason"><strong>AI's reasoning:</strong> matches past meals expenses at this vendor, but weekend date and no client noted lower the confidence — may be personal.</p>
+              <div class="flag-actions">
+                <span class="btn approve">Agree</span>
+                <span class="btn reject">Reject &amp; Correct</span>
+              </div>
+              <div class="flag-foot">Every decision recorded to the audit trail</div>
+            </div>
+          </div>
+
+          <!-- Slide 3: account proposal -->
+          <div class="slide" data-slide="2">
+            <div class="flag-card">
+              <div class="flag-head">
+                <span class="flag-label">Chart of accounts</span>
+                <span class="flag-badge">Proposal</span>
+              </div>
+              <div class="flag-by">
+                <div class="avatar ai">AI</div>
+                <span class="flag-by-text">Proposed by <strong>UpperBooks</strong></span>
+              </div>
+              <div class="flag-tx">
+                <div>
+                  <div class="flag-vendor">Add account: Vehicle &amp; Fuel</div>
+                  <div class="flag-cat">Cleaning services · marked Required</div>
+                </div>
+              </div>
+              <p class="flag-reason"><strong>Why it's proposed:</strong> this client logs regular vehicle costs but has nowhere to put them. Your industry template calls for this account.</p>
+              <div class="flag-actions">
+                <span class="btn approve">Accept</span>
+                <span class="btn reject">Decline</span>
+              </div>
+              <div class="flag-foot">Checked against templates your practice wrote</div>
+            </div>
+          </div>
+
+          <!-- Slide 4: accounts payable (shown as a team-chat thread) -->
+          <div class="slide" data-slide="3">
+            <div class="flag-card">
+              <div class="flag-head">
+                <span class="flag-label">Accounts payable</span>
+                <span class="flag-badge">Needs attention</span>
+              </div>
+              <div class="thread-item">
+                <div class="avatar ai">AI</div>
+                <div>
+                  <div class="thread-who">UpperBooks<span class="role">flagged a transaction</span></div>
+                  <p class="thread-text">Duplicate invoice suspected — same vendor and amount, two days apart.</p>
+                </div>
+              </div>
+              <div class="thread-item">
+                <div class="avatar"><svg viewBox="0 0 20 20"><circle cx="10" cy="7.2" r="3.2"/><path d="M4 16.5 C4 12.5 6.8 11 10 11 C13.2 11 16 12.5 16 16.5"/></svg></div>
+                <div>
+                  <div class="thread-who">Your bookkeeper<span class="role">replied</span></div>
+                  <p class="thread-text">Confirmed with the vendor — second one was a re-send, not a charge. Resolving.</p>
+                  <span class="thread-resolved">✓ Resolved</span>
+                </div>
+              </div>
+              <div class="flag-foot">One thread everyone sees — nothing lost in email</div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="glimpse-tabs" role="tablist" aria-label="Feature examples">
+          <button class="gtab active" role="tab" aria-selected="true" data-target="0">Overview</button>
+          <button class="gtab" role="tab" aria-selected="false" data-target="1">Review</button>
+          <button class="gtab" role="tab" aria-selected="false" data-target="2">Proposals</button>
+          <button class="gtab" role="tab" aria-selected="false" data-target="3">Payables</button>
+        </div>
+        <p class="glimpse-caption">Illustrations — not real client data</p>
+      </div>
+    </div>
+  </header>
+
+  <section class="ledger-section" id="ledgerSection">
+    <svg class="motif" viewBox="0 0 660 300" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <g fill="none" stroke="#E9EDE4" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="60" y1="20" x2="60" y2="280"/>
+        <line x1="180" y1="20" x2="180" y2="280"/>
+        <line x1="300" y1="20" x2="300" y2="280"/>
+        <line x1="420" y1="20" x2="420" y2="280"/>
+        <line x1="540" y1="20" x2="540" y2="280"/>
+        <path class="spark" pathLength="1" d="M20 230 L100 210 L170 236 L250 168 L330 190 L410 122 L490 148 L570 84 L640 96"/>
+        <circle cx="100" cy="210" r="4"/>
+        <circle cx="250" cy="168" r="4"/>
+        <circle cx="410" cy="122" r="4"/>
+        <circle cx="570" cy="84" r="4"/>
+      </g>
+    </svg>
+
+    <div class="wrap">
+      <span class="eyebrow sr">What we're building</span>
+      <p class="section-intro sr lag1">UpperBooks flags what needs a decision — categorization, missing accounts, compliance risk. Checked the same way, every time. Nothing changes until you approve it.</p>
+
+      <div class="ledger">
+        <div class="col left">
+          <div class="col-head">UpperBooks handles</div>
+
+          <div class="row expandable" data-row="0">
+            <button class="row-trigger" aria-expanded="false" aria-controls="drawer-0">
+              <span class="tick-btn">+</span>
+              <span class="row-label">Transaction categorization</span>
+              <span class="row-chevron">▾</span>
+            </button>
+            <div class="row-drawer"><div class="row-drawer-inner"><div class="row-drawer-content" id="drawer-0">
+              AI suggests a category for every transaction on your synced copy in UpperBooks, with a confidence level based on how this client has categorized similar transactions before. It shows its reasoning up front — your bookkeeper agrees, or rejects and corrects it, teaching the AI for next time. The client reviews the batch and approves before anything writes back to QuickBooks.
+            </div></div></div>
+          </div>
+
+          <div class="row expandable" data-row="1">
+            <button class="row-trigger" aria-expanded="false" aria-controls="drawer-1">
+              <span class="tick-btn">+</span>
+              <span class="row-label">IRS compliance monitoring</span>
+              <span class="row-chevron">▾</span>
+            </button>
+            <div class="row-drawer"><div class="row-drawer-inner"><div class="row-drawer-content" id="drawer-1">
+              Every transaction is checked against current IRS guidance in the background. Nothing needs your attention unless something's actually at risk — it's monitoring, not another inbox to manage.
+            </div></div></div>
+          </div>
+
+          <div class="row expandable" data-row="2">
+            <button class="row-trigger" aria-expanded="false" aria-controls="drawer-2">
+              <span class="tick-btn">+</span>
+              <span class="row-label">Proposals</span>
+              <span class="row-chevron">▾</span>
+            </button>
+            <div class="row-drawer"><div class="row-drawer-inner"><div class="row-drawer-content" id="drawer-2">
+              UpperBooks proposes three kinds of changes: chart of accounts updates, checked against the industry template your practice wrote; vendor cleanup, like recognizing "Amzz" as Amazon; and new categorization rules, learned from patterns in past transactions. Every proposal is accept or decline — nothing is added on its own.
+            </div></div></div>
+          </div>
+
+          <div class="row expandable" data-row="3">
+            <button class="row-trigger" aria-expanded="false" aria-controls="drawer-3">
+              <span class="tick-btn">+</span>
+              <span class="row-label">Bookkeeping best practices</span>
+              <span class="row-chevron">▾</span>
+            </button>
+            <div class="row-drawer"><div class="row-drawer-inner"><div class="row-drawer-content" id="drawer-3">
+              Sound, standard bookkeeping habits are checked automatically as transactions come in — the same way, for every client, every time. Nothing depends on remembering to check.
+            </div></div></div>
+          </div>
+
+          <div class="row expandable" data-row="4">
+            <button class="row-trigger" aria-expanded="false" aria-controls="drawer-4">
+              <span class="tick-btn">+</span>
+              <span class="row-label">Accounts payable review</span>
+              <span class="row-chevron">▾</span>
+            </button>
+            <div class="row-drawer"><div class="row-drawer-inner"><div class="row-drawer-content" id="drawer-4">
+              Vendor bills are checked for issues like possible duplicates before they're paid. UpperBooks flags what looks off and explains why — the user confirms and resolves it.
+            </div></div></div>
+          </div>
+
+        </div>
+        <div class="col right">
+          <div class="col-head">Left to your accounting software</div>
+
+          <div class="row expandable" data-row="5">
+            <button class="row-trigger" aria-expanded="false" aria-controls="drawer-5">
+              <span class="tick-btn">—</span>
+              <span class="row-label">Your accounting software stays the source of truth</span>
+              <span class="row-chevron">▾</span>
+            </button>
+            <div class="row-drawer"><div class="row-drawer-inner"><div class="row-drawer-content" id="drawer-5">
+              UpperBooks reviews and suggests — it doesn't replace the record your accounting software keeps. Every category, account, and flag traces back to what's already there.
+            </div></div></div>
+          </div>
+
+          <div class="row expandable" data-row="6">
+            <button class="row-trigger" aria-expanded="false" aria-controls="drawer-6">
+              <span class="tick-btn">—</span>
+              <span class="row-label">The books and bank reconciliations</span>
+              <span class="row-chevron">▾</span>
+            </button>
+            <div class="row-drawer"><div class="row-drawer-inner"><div class="row-drawer-content" id="drawer-6">
+              Once you agree to a categorization, UpperBooks posts it back to your accounting software. Reconciled transactions are never touched — even if UpperBooks would have categorized them differently.
+            </div></div></div>
+          </div>
+
+          <div class="row expandable" data-row="7">
+            <button class="row-trigger" aria-expanded="false" aria-controls="drawer-7">
+              <span class="tick-btn">—</span>
+              <span class="row-label">Financial reports and month-end close</span>
+              <span class="row-chevron">▾</span>
+            </button>
+            <div class="row-drawer"><div class="row-drawer-inner"><div class="row-drawer-content" id="drawer-7">
+              Running reports and closing the books stays entirely in your accounting software. UpperBooks feeds it cleaner categorization along the way — it doesn't run the close itself.
+            </div></div></div>
+          </div>
+
+          <div class="row expandable" data-row="8">
+            <button class="row-trigger" aria-expanded="false" aria-controls="drawer-8">
+              <span class="tick-btn">—</span>
+              <span class="row-label">Anything that already works in your workflow</span>
+              <span class="row-chevron">▾</span>
+            </button>
+            <div class="row-drawer"><div class="row-drawer-inner"><div class="row-drawer-content" id="drawer-8">
+              If a habit, tool, or process already works for your practice, UpperBooks isn't there to change it. It fits around what you do, not the other way around.
+            </div></div></div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="how" id="howSection">
+    <div class="wrap">
+      <span class="eyebrow sr how-eyebrow">How it works</span>
+
+      <div class="tl">
+        <div class="tl-track">
+          <div class="tl-progress"></div>
+          <div class="tl-spark" aria-hidden="true"></div>
+        </div>
+
+        <div class="how-grid">
+          <div class="how-step">
+            <div class="node">
+              <svg class="how-icon" viewBox="0 0 44 44" aria-hidden="true">
+                <path d="M22 8 V26"/>
+                <path d="M15 19 L22 26 L29 19"/>
+                <path d="M9 30 V33 A3 3 0 0 0 12 36 H32 A3 3 0 0 0 35 33 V30"/>
+              </svg>
+            </div>
+            <div class="step-body">
+              <span class="how-num">STEP 1</span>
+              <h3>Data arrives</h3>
+              <p>Transactions, the chart of accounts, and past history sync in automatically — so the AI learns this client's patterns from day one.</p>
+            </div>
+          </div>
+
+          <div class="how-step">
+            <div class="node">
+              <svg class="how-icon" viewBox="0 0 44 44" aria-hidden="true">
+                <circle cx="19" cy="18" r="10"/>
+                <line x1="26.5" y1="25.5" x2="36" y2="35"/>
+                <line x1="14" y1="16" x2="24" y2="16"/>
+                <line x1="14" y1="21" x2="21" y2="21"/>
+              </svg>
+            </div>
+            <div class="step-body">
+              <span class="how-num">STEP 2</span>
+              <h3>AI analyzes</h3>
+              <p>Checked against IRS guidance, your chart of accounts, and bookkeeping best practices — flagging what needs a decision.</p>
+            </div>
+          </div>
+
+          <div class="how-step">
+            <div class="node">
+              <svg class="how-icon" viewBox="0 0 44 44" aria-hidden="true">
+                <circle cx="22" cy="19" r="11"/>
+                <path d="M16.5 19.5 L20.5 23.5 L28 15.5"/>
+                <line x1="13" y1="37" x2="31" y2="37"/>
+              </svg>
+            </div>
+            <div class="step-body">
+              <span class="how-num">STEP 3</span>
+              <h3>Your bookkeeper decides</h3>
+              <p>They agree, or reject and correct it — teaching the AI for next time. Every decision is saved to a batch.</p>
+            </div>
+          </div>
+
+          <div class="how-step">
+            <div class="node">
+              <svg class="how-icon" viewBox="0 0 44 44" aria-hidden="true">
+                <path d="M22 8 V26"/>
+                <path d="M15 15 L22 8 L29 15"/>
+                <path d="M9 30 V33 A3 3 0 0 0 12 36 H32 A3 3 0 0 0 35 33 V30"/>
+              </svg>
+            </div>
+            <div class="step-body">
+              <span class="how-num">STEP 4</span>
+              <h3>The client approves</h3>
+              <p>They review the batch and approve it. Only then does it write back to your accounting software.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <p class="how-note sr">Reconciled transactions are never touched, even after approval.</p>
+    </div>
+  </section>
+
+  <section class="workspace">
+    <div class="wrap">
+      <div class="workspace-copy">
+        <span class="eyebrow sr">One shared workspace</span>
+        <h2 class="sr lag1">Where the team keeps each other in the loop.</h2>
+        <p class="sr lag2">Every client gets one activity feed — the AI's work, your team's replies, and the decisions that followed, all in one place. Nothing gets lost in a separate inbox.</p>
+        <p class="sr lag2">Comment, resolve, and follow what matters — the whole history stays with the client, not scattered across email threads.</p>
+        <p class="sr lag2">Clients are part of the conversation too — not locked out of it.</p>
+      </div>
+
+      <div class="ws-slides-wrap sr lag1">
+        <div class="ws-slides" id="wsSlides">
+
+          <!-- Slide 1: AP invoice thread -->
+          <div class="ws-slide active" data-ws-slide="0">
+            <div class="ws-card" aria-label="Illustration of a client activity feed">
+              <div class="ws-card-head">
+                <div class="ws-client"><span class="ws-client-dot"></span>Sample Client Co.</div>
+                <div class="ws-chips">
+                  <span class="ws-chip">2 open</span>
+                  <span class="ws-chip">Following</span>
+                </div>
+              </div>
+              <div class="ws-body">
+                <div class="ws-entry">
+                  <div class="ws-entry-head">
+                    <div class="avatar ai">AI</div>
+                    <div class="ws-entry-body">
+                      <div class="ws-who">UpperBooks<span class="ws-role">extracted an AP invoice</span></div>
+                      <p class="ws-text">Vendor invoice — Anthropic, PBC · $21.49</p>
+                    </div>
+                    <span class="ws-when">27d ago</span>
+                  </div>
+                  <p class="ws-earlier">5 earlier activities (<a href="#">show</a>)</p>
+                  <div class="ws-actions">
+                    <span>Like</span><span>Comment</span><span>Follow</span><span>Resolve</span>
+                  </div>
+
+                  <div class="ws-replies">
+                    <div class="ws-reply-item">
+                      <div class="ws-entry-head">
+                        <div class="avatar person2"><svg viewBox="0 0 20 20"><circle cx="10" cy="7" r="3"/><path d="M6.5 5.5 C6.5 3.2 8 2.3 10 2.3 C12 2.3 13.5 3.2 13.5 5.5 C13.5 6 13.3 6.6 13 7"/><path d="M3.6 16.8 C3.6 12.6 6.5 11 10 11 C13.5 11 16.4 12.6 16.4 16.8"/></svg></div>
+                        <div class="ws-entry-body">
+                          <div class="ws-who">Bookkeeper assistant<span class="ws-role">commented</span></div>
+                          <p class="ws-text">I'll check the vendor portal — might just be a duplicate export.</p>
+                        </div>
+                        <span class="ws-when">3d ago</span>
+                      </div>
+                    </div>
+
+                    <div class="ws-reply-item">
+                      <div class="ws-entry-head">
+                        <div class="avatar"><svg viewBox="0 0 20 20"><circle cx="10" cy="7.2" r="3.2"/><path d="M4 16.5 C4 12.5 6.8 11 10 11 C13.2 11 16 12.5 16 16.5"/></svg></div>
+                        <div class="ws-entry-body">
+                          <div class="ws-who">Senior bookkeeper<span class="ws-role">replied</span></div>
+                          <p class="ws-text">Confirmed with the client — this one's accurate. Resolving.</p>
+                        </div>
+                        <span class="ws-when">2d ago</span>
+                      </div>
+                      <div class="ws-actions">
+                        <span class="resolved-chip">✓ Resolved</span>
+                      </div>
+                    </div>
+
+                    <div class="ws-reply">
+                      <span class="ws-reply-input">Write a comment…</span>
+                      <span class="ws-reply-send">Send</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Slide 2: chart of accounts proposal, all four roles -->
+          <div class="ws-slide" data-ws-slide="1">
+            <div class="ws-card" aria-label="Illustration of a chart of accounts proposal thread">
+              <div class="ws-card-head">
+                <div class="ws-client"><span class="ws-client-dot"></span>Sample Client Co.</div>
+                <div class="ws-chips">
+                  <span class="ws-chip">1 open</span>
+                  <span class="ws-chip">Following</span>
+                </div>
+              </div>
+              <div class="ws-body">
+                <div class="ws-entry">
+                  <div class="ws-entry-head">
+                    <div class="avatar ai">AI</div>
+                    <div class="ws-entry-body">
+                      <div class="ws-who">UpperBooks<span class="ws-role">proposed a new account</span></div>
+                      <p class="ws-text">Add "Vehicle &amp; Fuel" — matches your industry template</p>
+                    </div>
+                    <span class="ws-when">14d ago</span>
+                  </div>
+                  <div class="ws-actions">
+                    <span>Like</span><span>Comment</span><span>Follow</span><span>Resolve</span>
+                  </div>
+
+                  <div class="ws-replies">
+                    <div class="ws-reply-item">
+                      <div class="ws-entry-head">
+                        <div class="avatar person3"><svg viewBox="0 0 20 20"><circle cx="10" cy="7" r="3"/><path d="M5.5 6 C5.5 3.5 7.5 2.5 10 2.5 C12.5 2.5 14.5 3.5 14.5 6"/><path d="M3.6 16.8 C3.6 12.6 6.5 11 10 11 C13.5 11 16.4 12.6 16.4 16.8"/></svg></div>
+                        <div class="ws-entry-body">
+                          <div class="ws-who">Accountant<span class="ws-role">commented</span></div>
+                          <p class="ws-text">Makes sense given the new mileage they're logging.</p>
+                        </div>
+                        <span class="ws-when">10d ago</span>
+                      </div>
+                    </div>
+
+                    <div class="ws-reply-item">
+                      <div class="ws-entry-head">
+                        <div class="avatar person2"><svg viewBox="0 0 20 20"><circle cx="10" cy="7" r="3"/><path d="M6.5 5.5 C6.5 3.2 8 2.3 10 2.3 C12 2.3 13.5 3.2 13.5 5.5 C13.5 6 13.3 6.6 13 7"/><path d="M3.6 16.8 C3.6 12.6 6.5 11 10 11 C13.5 11 16.4 12.6 16.4 16.8"/></svg></div>
+                        <div class="ws-entry-body">
+                          <div class="ws-who">Client<span class="ws-role">commented</span></div>
+                          <p class="ws-text">Yes, we lease two vans now — good catch.</p>
+                        </div>
+                        <span class="ws-when">6d ago</span>
+                      </div>
+                    </div>
+
+                    <div class="ws-reply-item">
+                      <div class="ws-entry-head">
+                        <div class="avatar"><svg viewBox="0 0 20 20"><circle cx="10" cy="7.2" r="3.2"/><path d="M4 16.5 C4 12.5 6.8 11 10 11 C13.2 11 16 12.5 16 16.5"/></svg></div>
+                        <div class="ws-entry-body">
+                          <div class="ws-who">Your bookkeeper<span class="ws-role">replied</span></div>
+                          <p class="ws-text">Adding it now. Resolving.</p>
+                        </div>
+                        <span class="ws-when">5d ago</span>
+                      </div>
+                      <div class="ws-actions">
+                        <span class="resolved-chip">✓ Resolved</span>
+                      </div>
+                    </div>
+
+                    <div class="ws-reply">
+                      <span class="ws-reply-input">Write a comment…</span>
+                      <span class="ws-reply-send">Send</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Slide 3: transaction thread, bookkeeper and client only -->
+          <div class="ws-slide" data-ws-slide="2">
+            <div class="ws-card" aria-label="Illustration of a transaction thread between bookkeeper and client">
+              <div class="ws-card-head">
+                <div class="ws-client"><span class="ws-client-dot"></span>Sample Client Co.</div>
+                <div class="ws-chips">
+                  <span class="ws-chip">1 open</span>
+                  <span class="ws-chip">Following</span>
+                </div>
+              </div>
+              <div class="ws-body">
+                <div class="ws-entry">
+                  <div class="ws-entry-head">
+                    <div class="avatar ai">AI</div>
+                    <div class="ws-entry-body">
+                      <div class="ws-who">UpperBooks<span class="ws-role">flagged a transaction</span></div>
+                      <p class="ws-text">Weekend charge, no client noted — may be personal</p>
+                    </div>
+                    <span class="ws-when">9d ago</span>
+                  </div>
+                  <div class="ws-actions">
+                    <span>Like</span><span>Comment</span><span>Follow</span><span>Resolve</span>
+                  </div>
+
+                  <div class="ws-replies">
+                    <div class="ws-reply-item">
+                      <div class="ws-entry-head">
+                        <div class="avatar"><svg viewBox="0 0 20 20"><circle cx="10" cy="7.2" r="3.2"/><path d="M4 16.5 C4 12.5 6.8 11 10 11 C13.2 11 16 12.5 16 16.5"/></svg></div>
+                        <div class="ws-entry-body">
+                          <div class="ws-who">Your bookkeeper<span class="ws-role">asked</span></div>
+                          <p class="ws-text">Was this one for the business, or personal?</p>
+                        </div>
+                        <span class="ws-when">8d ago</span>
+                      </div>
+                    </div>
+
+                    <div class="ws-reply-item">
+                      <div class="ws-entry-head">
+                        <div class="avatar person3"><svg viewBox="0 0 20 20"><circle cx="10" cy="7" r="3"/><path d="M5.5 6 C5.5 3.5 7.5 2.5 10 2.5 C12.5 2.5 14.5 3.5 14.5 6"/><path d="M3.6 16.8 C3.6 12.6 6.5 11 10 11 C13.5 11 16.4 12.6 16.4 16.8"/></svg></div>
+                        <div class="ws-entry-body">
+                          <div class="ws-who">Client<span class="ws-role">replied</span></div>
+                          <p class="ws-text">Personal, sorry — wrong card. I'll pay it back to the business.</p>
+                        </div>
+                        <span class="ws-when">7d ago</span>
+                      </div>
+                    </div>
+
+                    <div class="ws-reply-item">
+                      <div class="ws-entry-head">
+                        <div class="avatar"><svg viewBox="0 0 20 20"><circle cx="10" cy="7.2" r="3.2"/><path d="M4 16.5 C4 12.5 6.8 11 10 11 C13.2 11 16 12.5 16 16.5"/></svg></div>
+                        <div class="ws-entry-body">
+                          <div class="ws-who">Your bookkeeper<span class="ws-role">replied</span></div>
+                          <p class="ws-text">Got it, moving it to owner draws. Resolving.</p>
+                        </div>
+                        <span class="ws-when">7d ago</span>
+                      </div>
+                      <div class="ws-actions">
+                        <span class="resolved-chip">✓ Resolved</span>
+                      </div>
+                    </div>
+
+                    <div class="ws-reply">
+                      <span class="ws-reply-input">Write a comment…</span>
+                      <span class="ws-reply-send">Send</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Slide 4: IRS rule change, bookkeeper and client discuss impact -->
+          <div class="ws-slide" data-ws-slide="3">
+            <div class="ws-card" aria-label="Illustration of a thread about a new IRS rule change">
+              <div class="ws-card-head">
+                <div class="ws-client"><span class="ws-client-dot"></span>Sample Client Co.</div>
+                <div class="ws-chips">
+                  <span class="ws-chip">1 open</span>
+                  <span class="ws-chip">Following</span>
+                </div>
+              </div>
+              <div class="ws-body">
+                <div class="ws-entry">
+                  <div class="ws-entry-head">
+                    <div class="avatar ai">AI</div>
+                    <div class="ws-entry-body">
+                      <div class="ws-who">UpperBooks<span class="ws-role">flagged a rule change</span></div>
+                      <p class="ws-text">The small business deduction is now permanent and larger — this client likely qualifies</p>
+                    </div>
+                    <span class="ws-when">21d ago</span>
+                  </div>
+                  <p class="ws-earlier">Source: 2025 tax law update to IRC Section 199A</p>
+                  <div class="ws-actions">
+                    <span>Like</span><span>Comment</span><span>Follow</span><span>Resolve</span>
+                  </div>
+
+                  <div class="ws-replies">
+                    <div class="ws-reply-item">
+                      <div class="ws-entry-head">
+                        <div class="avatar"><svg viewBox="0 0 20 20"><circle cx="10" cy="7.2" r="3.2"/><path d="M4 16.5 C4 12.5 6.8 11 10 11 C13.2 11 16 12.5 16 16.5"/></svg></div>
+                        <div class="ws-entry-body">
+                          <div class="ws-who">Your bookkeeper<span class="ws-role">commented</span></div>
+                          <p class="ws-text">Good catch — this client's pass-through income qualifies. I'll flag it for their CPA at filing.</p>
+                        </div>
+                        <span class="ws-when">18d ago</span>
+                      </div>
+                    </div>
+
+                    <div class="ws-reply-item">
+                      <div class="ws-entry-head">
+                        <div class="avatar person3"><svg viewBox="0 0 20 20"><circle cx="10" cy="7" r="3"/><path d="M5.5 6 C5.5 3.5 7.5 2.5 10 2.5 C12.5 2.5 14.5 3.5 14.5 6"/><path d="M3.6 16.8 C3.6 12.6 6.5 11 10 11 C13.5 11 16.4 12.6 16.4 16.8"/></svg></div>
+                        <div class="ws-entry-body">
+                          <div class="ws-who">Client<span class="ws-role">replied</span></div>
+                          <p class="ws-text">That's great news — thanks for staying on top of this.</p>
+                        </div>
+                        <span class="ws-when">16d ago</span>
+                      </div>
+                    </div>
+
+                    <div class="ws-reply-item">
+                      <div class="ws-entry-head">
+                        <div class="avatar"><svg viewBox="0 0 20 20"><circle cx="10" cy="7.2" r="3.2"/><path d="M4 16.5 C4 12.5 6.8 11 10 11 C13.2 11 16 12.5 16 16.5"/></svg></div>
+                        <div class="ws-entry-body">
+                          <div class="ws-who">Your bookkeeper<span class="ws-role">replied</span></div>
+                          <p class="ws-text">Noted for year-end. Resolving.</p>
+                        </div>
+                        <span class="ws-when">16d ago</span>
+                      </div>
+                      <div class="ws-actions">
+                        <span class="resolved-chip">✓ Resolved</span>
+                      </div>
+                    </div>
+
+                    <div class="ws-reply">
+                      <span class="ws-reply-input">Write a comment…</span>
+                      <span class="ws-reply-send">Send</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="ws-tabs" role="tablist" aria-label="Workspace examples">
+          <button class="ws-tab active" role="tab" aria-selected="true" data-ws-target="0">Invoice thread</button>
+          <button class="ws-tab" role="tab" aria-selected="false" data-ws-target="1">Proposal thread</button>
+          <button class="ws-tab" role="tab" aria-selected="false" data-ws-target="2">Transaction thread</button>
+          <button class="ws-tab" role="tab" aria-selected="false" data-ws-target="3">IRS update</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="who" id="whoSection">
+    <div class="wrap">
+      <span class="eyebrow sr">Who it's for</span>
+      <h2 class="sr lag1">Accounting and bookkeeping practices,<br>and the businesses they look after.</h2>
+      <p class="sr lag2">From a one-person shop to a growing firm — the goal is less busywork. AI does the first pass, you make the final call.</p>
+      <div class="org-tree sr lag2">
+        <div class="org-item org-level-1">
+          <div class="org-node">
+            <div class="org-badge">A</div>
+            <div class="org-role">Practice admin</div>
+            <span class="org-arrow">→</span>
+            <div class="org-desc">The accountant who runs the practice — adds staff and oversees every client.</div>
+          </div>
+        </div>
+
+        <div class="org-item org-level-2 child">
+          <div class="org-node">
+            <div class="org-badge">B</div>
+            <div class="org-role">Bookkeepers</div>
+            <span class="org-arrow">→</span>
+            <div class="org-desc">Manage the clients assigned to them — the day-to-day of the books.</div>
+          </div>
+        </div>
+
+        <div class="org-item org-level-3 child">
+          <div class="org-node">
+            <div class="org-badge">O</div>
+            <div class="org-role">Business owners</div>
+            <span class="org-arrow">→</span>
+            <div class="org-desc">See their own business, answer questions, and weigh in on the thread.</div>
+          </div>
+        </div>
+
+        <div class="org-item org-level-4 child">
+          <div class="org-node">
+            <div class="org-badge">E</div>
+            <div class="org-role">Employees</div>
+            <span class="org-arrow">→</span>
+            <div class="org-desc">Invited by the owner, with access scoped to just what they need.</div>
+          </div>
+          <div class="org-extra">Each level only sees what belongs to it</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="commit">
+    <div class="wrap">
+      <div class="commit-grid">
+        <div class="item sr">
+          <span class="num">01</span>
+          <h3>If you're the business owner</h3>
+          <p>You always decide. Your bookkeeper prepares the work; nothing writes back to QuickBooks until you approve the batch.</p>
+        </div>
+        <div class="item sr lag1">
+          <span class="num">02</span>
+          <h3>If you're watching the budget</h3>
+          <p>You always see the cost. AI spend runs on prepaid credits, tracked to the penny — no surprise bill.</p>
+        </div>
+        <div class="item sr lag2">
+          <span class="num">03</span>
+          <h3>If you want oversight, not surprises</h3>
+          <p>AI watches a synced copy of your books. It never changes the real ones without your approval.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="wrap">
+      <span class="eyebrow sr">Status</span>
+      <p class="status-line sr lag1">In active development, built hand-in-hand with a working bookkeeping practice. Wider access arriving in January 2027.</p>
+
+      <div class="notify sr lag2" id="notifyBlock">
+        <p class="notify-label">Keep me updated</p>
+        <p class="notify-sub">We'll send one email when UpperBooks is ready — nothing before that.</p>
+
+        <form class="notify-form" id="notifyForm" novalidate>
+          <input
+            class="notify-input"
+            id="notifyEmail"
+            type="email"
+            name="email"
+            placeholder="you@company.com"
+            aria-label="Email address"
+            autocomplete="email"
+            required
+          >
+          <button class="notify-btn" type="submit" id="notifyBtn">Notify me</button>
+        </form>
+        <p class="notify-msg" id="notifyMsg" role="status" aria-live="polite"></p>
+
+        <div class="notify-success">
+          <svg class="check" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M7.5 12.5 L10.5 15.5 L16.5 9"/>
+          </svg>
+          <span>You're on the list — we'll email you at launch.</span>
+        </div>
+      </div>
+
+      <div class="foot-rule">
+        <span>UpperBooks — a bookkeeping practice's advisory layer</span>
+        <span><a class="foot-mail" href="mailto:contact@upperbooks.com">contact@upperbooks.com</a></span>
+        <span>© 2026</span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // ---------- hero feature slideshow ----------
+    (function () {
+      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const slides = [...document.querySelectorAll('#glimpseSlides .slide')];
+      const tabs = [...document.querySelectorAll('.gtab')];
+      const glimpse = document.querySelector('.glimpse');
+      const dataInTags = [...document.querySelectorAll('#dataInTags .check-tag')];
+      let current = 0;
+      let timer = null;
+      let tagTimers = [];
+
+      function lightDataInTags() {
+        tagTimers.forEach(clearTimeout);
+        tagTimers = [];
+        dataInTags.forEach((tag) => tag.classList.remove('lit'));
+        if (reduced) {
+          dataInTags.forEach((tag) => tag.classList.add('lit'));
+          return;
+        }
+        dataInTags.forEach((tag, i) => {
+          tagTimers.push(setTimeout(() => tag.classList.add('lit'), 300 + i * 450));
+        });
+      }
+
+      function show(index) {
+        current = index;
+        slides.forEach((s, i) => s.classList.toggle('active', i === index));
+        tabs.forEach((t, i) => {
+          t.classList.toggle('active', i === index);
+          t.setAttribute('aria-selected', i === index ? 'true' : 'false');
+        });
+        if (index === 0) lightDataInTags();
+      }
+
+      function next() {
+        show((current + 1) % slides.length);
+      }
+
+      function startTimer() {
+        if (reduced) return; // no auto-advance for reduced motion
+        stopTimer();
+        timer = setInterval(next, 12000);
+      }
+
+      function stopTimer() {
+        if (timer) { clearInterval(timer); timer = null; }
+      }
+
+      tabs.forEach((tab) => {
+        tab.addEventListener('click', () => {
+          show(parseInt(tab.dataset.target, 10));
+          startTimer(); // reset the clock after a manual choice
+        });
+      });
+
+      // pause while the visitor is reading a card
+      glimpse.addEventListener('mouseenter', stopTimer);
+      glimpse.addEventListener('mouseleave', startTimer);
+      glimpse.addEventListener('focusin', stopTimer);
+      glimpse.addEventListener('focusout', startTimer);
+
+      lightDataInTags(); // fire once on load, since slide 0 starts active
+      startTimer();
+    })();
+
+    // ---------- ledger drawer rows ----------
+    (function () {
+      const triggers = document.querySelectorAll('.row-trigger');
+      triggers.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const row = btn.closest('.row');
+          const isOpen = row.classList.toggle('open');
+          btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        });
+      });
+    })();
+
+    // ---------- workspace slideshow ----------
+    (function () {
+      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const slides = [...document.querySelectorAll('#wsSlides .ws-slide')];
+      const tabs = [...document.querySelectorAll('.ws-tab')];
+      const wrap = document.querySelector('.ws-slides-wrap');
+      if (!slides.length) return;
+      let current = 0;
+      let timer = null;
+
+      function show(index) {
+        current = index;
+        slides.forEach((s, i) => s.classList.toggle('active', i === index));
+        tabs.forEach((t, i) => {
+          t.classList.toggle('active', i === index);
+          t.setAttribute('aria-selected', i === index ? 'true' : 'false');
+        });
+      }
+
+      function next() { show((current + 1) % slides.length); }
+
+      function startTimer() {
+        if (reduced) return;
+        stopTimer();
+        timer = setInterval(next, 14000);
+      }
+      function stopTimer() { if (timer) { clearInterval(timer); timer = null; } }
+
+      tabs.forEach((tab) => {
+        tab.addEventListener('click', () => {
+          show(parseInt(tab.dataset.wsTarget, 10));
+          startTimer();
+        });
+      });
+
+      wrap.addEventListener('mouseenter', stopTimer);
+      wrap.addEventListener('mouseleave', startTimer);
+      wrap.addEventListener('focusin', stopTimer);
+      wrap.addEventListener('focusout', startTimer);
+
+      startTimer();
+    })();
+
+    // ---------- scroll-triggered reveals ----------
+    (function () {
+      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const targets = [
+        ...document.querySelectorAll('.sr'),
+        document.getElementById('ledgerSection'),
+        document.getElementById('howSection'),
+        document.getElementById('whoSection')
+      ];
+
+      if (reduced || !('IntersectionObserver' in window)) {
+        targets.forEach((el) => el && el.classList.add('in'));
+        return;
+      }
+
+      const io = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('in');
+              io.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.15, rootMargin: '0px 0px -60px 0px' }
+      );
+
+      targets.forEach((el) => el && io.observe(el));
+    })();
+
+    // ---------- keep-me-updated form ----------
+    // PLACEHOLDER — this does not send anywhere yet.
+    // Swap the body of submitEmail() for a real fetch() to your API route
+    // once the waitlist_signups table + route exist, e.g.:
+    //
+    //   const res = await fetch('/api/waitlist', {
+    //     method: 'POST',
+    //     headers: { 'Content-Type': 'application/json' },
+    //     body: JSON.stringify({ email })
+    //   });
+    //   if (!res.ok) throw new Error('request failed');
+
+    async function submitEmail(email) {
+      await new Promise((resolve) => setTimeout(resolve, 550)); // simulated latency
+      console.log('[placeholder] would submit email:', email);
+      return { ok: true };
+    }
+
+    const notifyForm = document.getElementById('notifyForm');
+    const notifyEmail = document.getElementById('notifyEmail');
+    const notifyBtn = document.getElementById('notifyBtn');
+    const notifyMsg = document.getElementById('notifyMsg');
+    const notifyBlock = document.getElementById('notifyBlock');
+
+    function isValidEmail(value) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+    }
+
+    notifyForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = notifyEmail.value.trim();
+
+      if (!isValidEmail(email)) {
+        notifyMsg.textContent = 'Enter a valid email address.';
+        notifyMsg.className = 'notify-msg err';
+        notifyEmail.focus();
+        return;
+      }
+
+      notifyMsg.textContent = '';
+      notifyMsg.className = 'notify-msg';
+      notifyBtn.disabled = true;
+      notifyBtn.textContent = 'Submitting…';
+
+      try {
+        const result = await submitEmail(email);
+        if (!result.ok) throw new Error('failed');
+        notifyBlock.classList.add('done');
+      } catch (err) {
+        notifyMsg.textContent = 'Something went wrong — please try again.';
+        notifyMsg.className = 'notify-msg err';
+        notifyBtn.disabled = false;
+        notifyBtn.textContent = 'Notify me';
+      }
+    });
+  </script>
+
+</body>
+</html>
